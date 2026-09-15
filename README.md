@@ -1,37 +1,154 @@
 # SO Engine 3.3
 
-CS2 Steam Market FIFO wall-aware buy-order calculator. The Python package is the only executable source of truth; the Hermes skill is a thin operational adapter.
+**SO Engine** is a Windows-friendly Python tool for analysing Counter-Strike 2 items on the **Steam Community Market** and producing auditable buy-order recommendations. It combines live market data, FIFO-aware queue reasoning, structural-wall detection, configurable discount bands, and deterministic budget allocation.
+
+The project is designed for research and decision support. It **does not place Steam orders, buy or sell items, bypass Steam controls, or promise a fill time or profit**.
+
+## Steam Market examples
+
+The images below are item thumbnails served by Steam's Community Market listing pages. They are illustrative examples of the kind of CS2 listings that SO Engine can inspect; prices, order-book depth, and availability are live market values and change continuously.
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Redline%20%28Field-Tested%29">
+        <img src="docs/assets/steam-market/ak47-redline-field-tested.png" alt="AK-47 | Redline (Field-Tested) on the Steam Community Market" width="260">
+      </a>
+      <br>
+      <sub><b>AK-47 | Redline (Field-Tested)</b></sub>
+    </td>
+    <td align="center">
+      <a href="https://steamcommunity.com/market/listings/730/M4A1-S%20%7C%20Printstream%20%28Field-Tested%29">
+        <img src="docs/assets/steam-market/m4a1s-printstream-field-tested.png" alt="M4A1-S | Printstream (Field-Tested) on the Steam Community Market" width="260">
+      </a>
+      <br>
+      <sub><b>M4A1-S | Printstream (Field-Tested)</b></sub>
+    </td>
+  </tr>
+</table>
+
+> **Image provenance:** the thumbnails are downloaded from Steam's official Community Market CDN and linked to their corresponding Steam Market listings. They are included only to illustrate the input domain; SO Engine never treats an image as pricing data.
+
+## What SO Engine does
+
+For each requested item, the engine can:
+
+1. Resolve the canonical Steam Market listing URL.
+2. Read the current buy-order histogram and relevant market fields.
+3. Identify the current top buy order and the visible queue structure.
+4. Detect structural walls using order-count and relative-depth criteria.
+5. Select a buy-order price with the protected FIFO/wall-aware selector.
+6. Apply liquidity, spread, margin, and visible-queue filters when enabled.
+7. Allocate quantities against a total budget without exceeding the integer-cent budget.
+8. Write machine-readable output, checkpoint state, failed/skipped rows, and a JSON audit.
+
+The canonical pricing implementation is:
+
+```text
+so_engine.selector:choose_bid_order
+```
+
+The Hermes skill and compatibility launchers are operational adapters; they do not contain a second pricing formula.
+
+## Core pricing model
+
+The default selector uses a configurable discount band below the current top buy order. The current defaults are:
+
+- **9% minimum discount** from the top buy order;
+- **13% maximum discount** from the top buy order;
+- inclusive integer-cent calculations;
+- structural-wall and FIFO/queue-aware selection;
+- explicit fallback and rounding behavior covered by regression tests.
+
+The band can be overridden for one run with basis-point flags, without changing the persistent default:
+
+```bash
+uv run so-engine \
+  --min-discount-bps 1300 \
+  --max-discount-bps 900 \
+  --items-file input.txt
+```
+
+The selector is protected by regression tests. Changes to discount boundaries, walls, queue semantics, fallback behavior, rounding, or strategy defaults require explicit approval before implementation.
+
+## Budget allocation
+
+After live prices are obtained, the default allocator:
+
+1. calculates the established equal-budget quantities;
+2. derives a shared floor-average baseline;
+3. caps the baseline so the total spend remains within the requested budget;
+4. distributes the remaining budget one unit at a time in descending `price_cents` order;
+5. preserves input order and duplicate rows;
+6. records the allocation and spend reconciliation in the audit.
+
+The default budget is USD 20,000.00 and the CLI accepts budgets up to USD 100,000.00. A price row is never silently replaced with an invented value when Steam data is unavailable.
 
 ## Architecture
 
 ```text
 so_engine/
-  app.py       Steam I/O, batch orchestration, state, audit and budget allocation
-  selector.py  protected deterministic pricing selector
-  cli.py       console entry point
-  __main__.py  python -m so_engine
-tests/                  automated regression and packaging tests
-docs/                   changelog and project documentation
-archive/batch_refresh/  preserved historical batch inputs and logs
-launcher/               implementation behind the root Windows shortcut
-runtime/                live run artifacts
-SO Engine.py            backward-compatible launcher
-bid_order_algorithm.py  backward-compatible selector imports
-skill/so-engine/         project-owned Hermes skill source
+  app.py       Steam requests, market parsing, orchestration, state, audit, allocation
+  selector.py  Protected deterministic FIFO/wall-aware pricing selector
+  cli.py       Console entry point
+  __main__.py  python -m so_engine entry point
+  py.typed     Typing marker for installed consumers
+
+tests/         Regression, CLI, packaging, security-boundary, and contract tests
+docs/          Changelog and project documentation
+launcher/      Windows launcher implementation
+skill/         Project-owned Hermes operational skill
+SO Engine.py   Backward-compatible launcher
+bid_order_algorithm.py
+               Backward-compatible selector imports
 ```
 
-Do not duplicate pricing formulas in the skill or helper scripts. The canonical selector is `so_engine.selector:choose_bid_order`.
+The current machine-readable contract is:
 
-## Setup
+```json
+{
+  "algorithm_version": "fifo-wall-aware-v4",
+  "app_version": "3.3.0",
+  "audit_schema_version": 1,
+  "checkpoint_schema_version": 2,
+  "output_format": "Item;count;price",
+  "pricing_source": "so_engine.selector:choose_bid_order"
+}
+```
 
-Requires Python 3.11+ and `uv`.
+Generate the contract from the installed project instead of copying it from documentation:
+
+```bash
+uv run so-engine --describe-contract
+```
+
+## Requirements
+
+- Windows 10/11 or another Python 3.11+ environment;
+- Python 3.11 or newer;
+- [`uv`](https://docs.astral.sh/uv/);
+- access to the Steam Community Market for live runs.
+
+The packaged application is network-free during self-tests. A live pricing run needs Steam connectivity and may require a legitimate, properly configured proxy pool if the current route is rate-limited.
+
+## Installation and self-test
+
+From the project root:
 
 ```bash
 uv sync
+uv run so-engine --version
+uv run so-engine --describe-contract
 uv run so-engine --self-test
 ```
 
-Build and install:
+Expected self-test result:
+
+```text
+SELF-TEST: OK
+```
+
+Build the package and install the wheel:
 
 ```bash
 uv build
@@ -39,87 +156,135 @@ uv tool install dist/so_engine-3.3.0-py3-none-any.whl
 so-engine --version
 ```
 
-## Machine-readable contract
+The compatibility entry points remain available:
 
 ```bash
-uv run so-engine --describe-contract
+python -m so_engine --self-test
+python "SO Engine.py" --self-test
 ```
 
-The response identifies application version, protected algorithm version, audit/checkpoint schemas, output format, and canonical pricing source. The project verifier and skill use this contract instead of maintaining a second implementation.
+## Input format
 
-## Input
+Use exactly one input source: positional item names, `--items-file`, or the explicit `--demo` flag.
 
-UTF-8/UTF-8-BOM:
+`--items-file` accepts UTF-8 or UTF-8-BOM text in any of these forms:
 
 ```text
-Item Name;old_price
-Item Name;count;old_price
-8|Item Name;old_price
+AK-47 | Redline (Field-Tested);0.00
+AK-47 | Redline (Field-Tested);4;0.00
+8;AK-47 | Redline (Field-Tested);0.00
 ```
 
-Old prices are comparison context and never pricing input. With the default total budget, the engine first calculates equal-budget row quantities, then replaces every input quantity with their floor arithmetic mean. If that common count would exceed the budget, it is reduced to the highest affordable integer count. The remaining budget then adds one item at a time in descending price order, skipping a row when its next item does not fit, until no next item fits. `--total-budget` accepts at most USD 100,000.00, and allocation aborts before creating an oversized subset state.
+The old price is comparison context only. It is never used as the selector's live pricing input. Empty, malformed, non-UTF-8, and comment-only files fail closed with a concise configuration error.
 
-Choose exactly one input source: positional item names, `--items-file`, or the explicit `--demo` flag. Running without a source is rejected instead of silently sending requests for built-in examples; malformed, non-UTF-8, and empty/comment-only item files are also rejected. Duration options reject negative, `NaN`, and infinite values before processing starts.
+## Standard live run
 
-## Output
-
-Exactly:
-
-```text
-Item Name;count;price
-```
-
-Prices are handled internally as integer USD cents.
-
-By default, the selector prices buy orders in the 9–13% discount band below the current top buy order. The CLI keeps this policy visible as `--min-discount-bps 1300` and `--max-discount-bps 900`.
-
-Exit status `0` means every requested row was priced. Status `3` means the batch completed but at least one item was unresolved or skipped by a filter; inspect the failed/skipped artifacts and audit before consuming the output. CLI configuration/input errors use status `2`; expected runtime/checkpoint/filesystem failures use status `1` with a concise redacted diagnostic instead of a traceback.
-
-## Standard run
+Use a fresh run directory and explicit artifact names:
 
 ```bash
 uv run so-engine \
   --items-file input.txt \
-  --run-dir runtime/run-20260715-180000 \
+  --run-dir runtime/run-20260915-180000 \
   --output result.txt \
-  --checkpoint progress.json \
+  --checkpoint checkpoint.json \
   --failed-output failed.txt \
   --skipped-output skipped.txt \
   --audit-file audit.json \
   --total-budget 20000.00 \
-  --debug 2> runtime/run-20260715-180000/debug.log
+  --debug 2> runtime/run-20260915-180000/debug.log
 ```
 
-Compatibility commands remain available:
+When `--run-dir` is set, relative artifact arguments are resolved under that directory. Pass artifact basenames such as `result.txt` and `checkpoint.json`; do not prefix them with the run directory a second time.
 
-```bash
-python -m so_engine --self-test
-python 'SO Engine.py' --self-test
+### Output contract
+
+The machine-readable result is exactly:
+
+```text
+Item;count;price
 ```
 
-Generated artifact names are resolved under `--run-dir`. In a source checkout the default is `runtime/` under the project; an installed wheel uses `./runtime` under the current directory. Primary, input, atomic `.tmp`, and lock-authority `.guard` paths must be unique. A persistent `so_engine.run.lock` records ownership diagnostics; `released: true` means no process owns it. A separate persistent `.guard` inode holds the authoritative OS advisory lock so replacing diagnostic metadata cannot admit a second process.
+Example shape:
 
-## Resume
+```text
+AK-47 | Redline (Field-Tested);12;37.45
+M4A1-S | Printstream (Field-Tested);4;91.20
+```
+
+The example values above are format examples, not live market quotes. Prices are handled internally as integer USD cents and formatted with two decimal places.
+
+### Run artifacts
+
+A complete run may contain:
+
+- `result.txt` — native `Item;count;price` output;
+- `checkpoint.json` — resumable public market state and metadata;
+- `audit.json` — pricing decisions, allocation, totals, and completion counts;
+- `failed.txt` — unresolved unique items and redacted reasons;
+- `skipped.txt` — items rejected by configured liquidity/margin filters;
+- `debug.log` — optional redacted diagnostics;
+- `so_engine.run.lock` and its `.guard` lock authority.
+
+A zero exit code is necessary but not sufficient for acceptance. Before consuming output, confirm that the audit reports zero unresolved/skipped rows, the result row count matches the parsed input, every count is positive, and integer-cent spend does not exceed the budget.
+
+## Resume and checkpoints
+
+Resume only with the matching checkpoint and input:
 
 ```bash
 uv run so-engine \
   --items-file input.txt \
-  --run-dir runtime/run-20260715-180000 \
-  --checkpoint progress.json \
+  --run-dir runtime/run-20260915-180000 \
+  --checkpoint checkpoint.json \
   --resume \
   --output result-resumed.txt \
   --audit-file audit-resumed.json
 ```
 
-Checkpoint reuse is not live market data and is labeled `REUSED_CHECKPOINT` in audit. Only the current checkpoint schema is accepted, with non-empty algorithm, input, and strategy hashes; malformed, non-object, unknown, or incomplete checkpoints fail closed. Force-resume immediately rewrites filtered state and current metadata even when every requested item is reused.
+Checkpoint reuse is labeled `REUSED_CHECKPOINT` in the audit. It is not a fresh market snapshot. The engine validates algorithm, input, and strategy metadata and fails closed for malformed or incompatible checkpoint state. Use `--resume-force` only when the changed input or version has been deliberately reviewed.
 
-## Proxies
+## Filters and operational controls
 
-Prefer `--proxy-file` to command-line credentials. Supported formats include `host:port`, `host:port:user:pass`, `user:pass@host:port`, explicit HTTP/HTTPS proxy URLs, and authenticated SOCKS5 URLs such as `socks5://user:password@host:port`. Scheme-free entries use HTTPS by default; use an explicit `http://` or `socks5://` prefix only when the provider specifies that protocol. Proxy files must be UTF-8; missing files, invalid encodings, and malformed entries fail as concise configuration errors. Passwords are redacted from program diagnostics. Never commit proxy files; `.gitignore` excludes common proxy filenames.
+The CLI exposes run-scoped controls for:
+
+- minimum and maximum discount in basis points;
+- minimum spread and minimum net margin;
+- Steam sell-fee basis points used by net-margin calculations;
+- maximum visible queue ahead;
+- minimum visible buy-order count;
+- structural-wall minimum order count and relative multiplier;
+- request and batch pacing;
+- proxy quarantine threshold and quarantine duration;
+- stale-lock handling;
+- progress, quiet, and debug output.
+
+See the complete interface with:
+
+```bash
+uv run so-engine --help
+```
+
+Run-scoped overrides do not modify the protected default selector policy unless a separate, explicitly approved maintenance change is made.
+
+## Proxies and rate limits
+
+Prefer a local ignored proxy file instead of putting credentials on the command line:
+
+```bash
+uv run so-engine \
+  --items-file input.txt \
+  --proxy-file proxies.txt
+```
+
+Supported proxy forms include `host:port`, `host:port:user:pass`, `user:pass@host:port`, explicit HTTP/HTTPS URLs, and authenticated SOCKS5 URLs. Scheme-free entries use HTTPS by default. The repository ignores `proxies*.txt`, `proxy*.txt`, `.env`, runtime output, caches, and local desktop attachments.
+
+Proxy credentials are never intended for source control, logs, audit files, README examples, or chat. Debug output exposes only generic labels such as `configured-proxy`.
+
+A generic HTTPS success is not proof that Steam Market requests are eligible. If Steam returns HTTP 429, diagnose the exact listing route and configured proxy paths with bounded probes before launching a long batch. Do not invent prices or alter the selector to work around an upstream rate limit.
 
 ## Verification
 
-Quick contract/self-test check:
+Quick gate:
 
 ```bash
 uv run python skill/so-engine/scripts/verify_project.py --quick
@@ -131,8 +296,35 @@ Full network-free release gate:
 uv run python skill/so-engine/scripts/verify_project.py
 ```
 
-The quick gate also executes the editable module and generated console script from outside the checkout, catching Windows Unicode-path/bootstrap failures. The full gate additionally runs compilation, normal and optimized self-tests, pytest, Ruff, mypy, Bandit, coverage, and an isolated wheel build/install smoke test covering the CLI contract, compatibility import, and typing marker.
+The full verifier covers compilation, normal and optimized self-tests, pytest, Ruff, mypy, Bandit, coverage, wheel build/install smoke tests, CLI contract checks, compatibility imports, and the typing marker.
 
-## Development guardrail
+## Safety and data boundaries
 
-Pricing behavior is protected. Architecture, packaging, networking, state, audit, tests, and performance may be improved only while selector regression outputs remain unchanged. Any proposed change to price formulas, discount boundaries, walls, queue semantics, fallback, rounding, or strategy defaults requires the user's explicit approval first.
+- Market values are snapshots, not guarantees of execution, profit, or future liquidity.
+- The old price in an input file is never substituted for missing live data.
+- Duplicate input rows remain duplicate output rows.
+- Failed and skipped items are reported rather than silently dropped.
+- Runtime artifacts and checkpoints must not contain proxy credentials, raw secret headers, or account passwords.
+- The project does not automate Steam login, inventory transfers, market purchases, or order placement.
+- Pricing behavior is protected; architecture and packaging changes must preserve selector regression outputs.
+
+## Project status
+
+Current package version: **3.3.0**
+
+Algorithm contract: **`fifo-wall-aware-v4`**
+
+Output contract: **`Item;count;price`**
+
+See [`docs/CHANGELOG.md`](docs/CHANGELOG.md) for release history and compatibility notes.
+
+## License
+
+The repository is public for inspection and collaboration, but the project does not currently grant a permissive open-source license. Unless a license file or an explicit author grant is added, all rights remain with the author.
+
+## Links
+
+- [SO Engine repository](https://github.com/Oscar514444/so-engine)
+- [Steam Community Market](https://steamcommunity.com/market/)
+- [Counter-Strike 2 Market listings](https://steamcommunity.com/market/search?appid=730)
+- [uv documentation](https://docs.astral.sh/uv/)

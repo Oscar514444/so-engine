@@ -4,6 +4,11 @@ All notable changes to SO Engine are recorded here.
 
 ## Unreleased
 
+### Added
+
+- Expanded the public README with architecture, input/output contracts, budget allocation, operational controls, safety boundaries, and Steam Community Market examples.
+- Added illustrative Steam Market item thumbnails under `docs/assets/steam-market/` with links to their source listings.
+
 ### Changed
 
 - Replace per-row equal-budget quantities with a floor-average baseline, then spend the remaining budget one item at a time in descending price order.
