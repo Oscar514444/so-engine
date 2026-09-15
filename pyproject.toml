@@ -1,0 +1,58 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "so-engine"
+version = "3.3.0"
+description = "CS2 Steam FIFO wall-aware buy-order calculator"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Private" }
+dependencies = [
+    "pysocks>=1.7,<2",
+]
+
+[project.scripts]
+so-engine = "so_engine.cli:main"
+
+[dependency-groups]
+dev = [
+  "bandit>=1.8,<2",
+  "editables~=0.3",
+  "mypy>=1.15,<2",
+  "coverage[toml]>=7,<8",
+  "pytest>=9,<10",
+  "ruff>=0.11,<1",
+  "types-pysocks>=1.7,<2",
+]
+
+[tool.hatch.build]
+dev-mode-exact = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["so_engine", "bid_order_algorithm.py"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+norecursedirs = ["runtime", "archive", ".git", ".venv"]
+
+[tool.coverage.run]
+branch = true
+source = ["so_engine"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+exclude = ["runtime", "archive"]
+
+[tool.mypy]
+python_version = "3.11"
+files = ["so_engine", "bid_order_algorithm.py", "SO Engine.py"]
+strict = true

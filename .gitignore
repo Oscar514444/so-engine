@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+
+# Builds
+build/
+dist/
+*.egg-info/
+
+# Runtime and historical batch artifacts
+runtime/
+batch_refresh/
+
+# Local secrets and proxy lists
+.env
+.env.*
+*.proxy
+proxies*.txt
+proxy*.txt
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local desktop shortcuts and exported result/input files
+.hermes/
+*.lnk
+01_*.txt
+prices*.txt
