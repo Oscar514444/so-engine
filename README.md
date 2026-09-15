@@ -14,14 +14,14 @@ The images below are item thumbnails served by Steam's Community Market listing 
   <tr>
     <td align="center">
       <a href="https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Redline%20%28Field-Tested%29">
-        <img src="docs/assets/steam-market/ak47-redline-field-tested.png" alt="AK-47 | Redline (Field-Tested) on the Steam Community Market" width="260">
+        <img src="https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLwlcK3wiFO0POlPPNSI_-RHGavzOtyufRkASq2lkxx4W-HnNyqJC3FZwYoC5p0Q7FfthW6wdWxPu-371Pdit5HnyXgznQeHYY5wyA/360fx360f" alt="AK-47 | Redline (Field-Tested) on the Steam Community Market" width="260">
       </a>
       <br>
       <sub><b>AK-47 | Redline (Field-Tested)</b></sub>
     </td>
     <td align="center">
       <a href="https://steamcommunity.com/market/listings/730/M4A1-S%20%7C%20Printstream%20%28Field-Tested%29">
-        <img src="docs/assets/steam-market/m4a1s-printstream-field-tested.png" alt="M4A1-S | Printstream (Field-Tested) on the Steam Community Market" width="260">
+        <img src="https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8ypexwjFS4_ega6F_H_OGMWrEwL9lj_F7Rienhgk1tjyIpYL8JSLSMxghAsBwQeMN5BHtlIblZuLr4Q3biNkRmH_5iX5Muypj47pWA6EsqPaGkUifZp-rQ1Ym/360fx360f" alt="M4A1-S | Printstream (Field-Tested) on the Steam Community Market" width="260">
       </a>
       <br>
       <sub><b>M4A1-S | Printstream (Field-Tested)</b></sub>
