@@ -11,6 +11,9 @@ All notable changes to SO Engine are recorded here.
 
 ### Changed
 
+- Position SO Engine as **Steam Order Engine**, a program for finding the best CS2 buy-order price on the Steam Community Market.
+- Make the main CLI's 9–13% below-top-buy-order band permanent by removing custom discount-band options.
+- Document the complete fixed-band FIFO/wall-aware price-selection algorithm in the public README.
 - Replace per-row equal-budget quantities with a floor-average baseline, then spend the remaining budget one item at a time in descending price order.
 - Update the default buy-order discount band from 8–12% to 9–13% below the current top buy order.
 

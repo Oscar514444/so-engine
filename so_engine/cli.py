@@ -1,4 +1,4 @@
-"""Stable package CLI for the canonical SO Engine application."""
+"""Stable package CLI for the canonical Steam Order Engine application."""
 
 from .app import main
 

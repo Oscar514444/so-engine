@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "so-engine"
 version = "3.3.0"
-description = "CS2 Steam FIFO wall-aware buy-order calculator"
+description = "Steam Order Engine: fixed-band CS2 Steam Market buy-order price finder"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "Private" }

@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-"""CS2 Steam Market FIFO wall-aware buy-order calculator.
+"""Steam Order Engine: fixed-band CS2 Steam buy-order calculator.
 
 The script fetches Steam's live cumulative ``buy_order_graph`` and selects a
-buy-order ceiling using the agreed 9–13% discount band and structural-wall
-rules. All internal prices are integer cents.
+buy-order price inside the permanent 9–13% discount band and applies
+structural-wall rules. All internal prices are integer cents.
 
 Output:
     Item Name;count;price
@@ -1731,7 +1731,13 @@ def run_self_test() -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="CS2 Steam FIFO wall-aware buy-order calculator")
+    parser = argparse.ArgumentParser(
+        description=(
+            "SO Engine (Steam Order Engine): программа для нахождения лучшей цены "
+            "buy order на Steam Community Market для CS2. "
+            "Основная программа использует постоянный диапазон 9–13% ниже верхнего buy order."
+        )
+    )
     parser.add_argument("items", nargs="*", help="Названия предметов")
     parser.add_argument(
         "--items-file",
@@ -1829,18 +1835,6 @@ def main() -> int:
         "--request-delay-ms", type=int, default=500, help="Пауза между HTML и JSON запросом"
     )
     parser.add_argument(
-        "--min-discount-bps",
-        type=int,
-        default=1300,
-        help="Максимальная скидка от top bid, bps (1300 = 13%%)",
-    )
-    parser.add_argument(
-        "--max-discount-bps",
-        type=int,
-        default=900,
-        help="Минимальная скидка от top bid, bps (900 = 9%%)",
-    )
-    parser.add_argument(
         "--wall-min-orders",
         type=int,
         default=10,
@@ -1912,8 +1906,6 @@ def main() -> int:
         parser.error("параметры proxy должны быть положительными")
     try:
         strategy_config = BidOrderConfig(
-            band_low_bps=args.min_discount_bps,
-            band_high_bps=args.max_discount_bps,
             wall_abs_min=args.wall_min_orders,
             wall_rel_mult=args.wall_relative_multiplier,
         )

@@ -1,8 +1,10 @@
-# SO Engine 3.3
+# SO Engine 3.3 — Steam Order Engine
 
-**SO Engine** is a Windows-friendly Python tool for analysing Counter-Strike 2 items on the **Steam Community Market** and producing auditable buy-order recommendations. It combines live market data, FIFO-aware queue reasoning, structural-wall detection, configurable discount bands, and deterministic budget allocation.
+**SO Engine** means **Steam Order Engine**. It is a Windows-friendly Python program for finding the best price for a Counter-Strike 2 **buy order** on the **Steam Community Market**. It combines live order-book data, FIFO-aware queue reasoning, structural-wall detection, a permanent 9–13% pricing band, and deterministic budget allocation.
 
-The project is designed for research and decision support. It **does not place Steam orders, buy or sell items, bypass Steam controls, or promise a fill time or profit**.
+Here, “best price” means the highest admissible buy-order price selected by the protected algorithm inside the fixed discount band, while respecting visible walls and queue conditions. It is not a promise of execution, profit, or a particular fill time.
+
+The program is a calculator and decision-support tool. It **does not log in to Steam, place orders, buy or sell items, bypass Steam controls, or promise a fill**.
 
 ## Steam Market examples
 
@@ -29,18 +31,24 @@ The images below are item thumbnails served by Steam's Community Market listing 
 
 > **Image provenance:** the thumbnails are downloaded from Steam's official Community Market CDN and linked to their corresponding Steam Market listings. They are included only to illustrate the input domain; SO Engine never treats an image as pricing data.
 
-## What SO Engine does
+## Product algorithm: finding the best buy-order price
 
-For each requested item, the engine can:
+The main program uses one permanent pricing policy: **9–13% below the current top buy order**. The discount is represented internally in basis points as `900` to `1300`, but the CLI intentionally exposes no discount-band override.
 
-1. Resolve the canonical Steam Market listing URL.
-2. Read the current buy-order histogram and relevant market fields.
-3. Identify the current top buy order and the visible queue structure.
-4. Detect structural walls using order-count and relative-depth criteria.
-5. Select a buy-order price with the protected FIFO/wall-aware selector.
-6. Apply liquidity, spread, margin, and visible-queue filters when enabled.
-7. Allocate quantities against a total budget without exceeding the integer-cent budget.
-8. Write machine-readable output, checkpoint state, failed/skipped rows, and a JSON audit.
+For every requested CS2 item, SO Engine follows this sequence:
+
+1. **Open the canonical Steam Market listing.** The engine validates the HTTPS route and reads the live listing and order-book endpoints.
+2. **Read the buy-order graph.** Steam supplies cumulative counts for price levels. The engine sorts levels from the highest price down and decomposes cumulative counts into real per-level order counts.
+3. **Find the top buy order.** The highest positive buy-order level becomes `top_bid_cents`. All calculations use integer cents rather than floating-point prices.
+4. **Build the fixed band.** For a top order `T`, the inclusive integer-cent band is:
+   - lower boundary: `ceil(T × 0.87)` — 13% below the top order;
+   - upper boundary: `floor(T × 0.91)` — 9% below the top order.
+5. **Inspect the levels inside the band.** The engine calculates the median order count for in-band levels. A level is treated as a structural wall when it has at least 10 orders **or** reaches at least twice the in-band median threshold.
+6. **Cross the highest usable wall.** Walls are checked from the highest price down. The selected price is exactly one cent above the first wall whose next cent remains inside the band and does not land on another wall. This is the FIFO-aware “best” price: as high as the protected policy allows without placing directly into the detected wall.
+7. **Use the deterministic fallback.** If no wall can be crossed safely inside the fixed band, the engine selects the lower band boundary. It records whether the decision was `above_wall` or `band_bottom` and preserves warnings for large levels above the band.
+8. **Measure visible queue and market gates.** The audit records the visible queue ahead, best sell order, gross spread, and optional fee-aware net margin. Optional liquidity, queue, spread, and margin filters can mark an item as skipped; they never change the fixed 9–13% selector band.
+9. **Allocate the requested budget.** After all live prices are selected, SO Engine calculates a shared quantity baseline, caps it to the total budget, and spends remaining feasible cents in descending price order while preserving input order and duplicates.
+10. **Publish auditable output.** The result is written as `Item;count;price`, with checkpoint, failure, skipped-row, lock, and JSON-audit artifacts for verification and resume.
 
 The canonical pricing implementation is:
 
@@ -48,28 +56,7 @@ The canonical pricing implementation is:
 so_engine.selector:choose_bid_order
 ```
 
-The Hermes skill and compatibility launchers are operational adapters; they do not contain a second pricing formula.
-
-## Core pricing model
-
-The default selector uses a configurable discount band below the current top buy order. The current defaults are:
-
-- **9% minimum discount** from the top buy order;
-- **13% maximum discount** from the top buy order;
-- inclusive integer-cent calculations;
-- structural-wall and FIFO/queue-aware selection;
-- explicit fallback and rounding behavior covered by regression tests.
-
-The band can be overridden for one run with basis-point flags, without changing the persistent default:
-
-```bash
-uv run so-engine \
-  --min-discount-bps 1300 \
-  --max-discount-bps 900 \
-  --items-file input.txt
-```
-
-The selector is protected by regression tests. Changes to discount boundaries, walls, queue semantics, fallback behavior, rounding, or strategy defaults require explicit approval before implementation.
+The Hermes skill and compatibility launchers are operational adapters; they do not contain a second pricing formula. The selector is protected by regression tests. Changes to the fixed band, wall rules, queue semantics, fallback behavior, rounding, or strategy thresholds require explicit approval before implementation.
 
 ## Budget allocation
 
@@ -245,9 +232,8 @@ Checkpoint reuse is labeled `REUSED_CHECKPOINT` in the audit. It is not a fresh 
 
 ## Filters and operational controls
 
-The CLI exposes run-scoped controls for:
+The CLI exposes controls for:
 
-- minimum and maximum discount in basis points;
 - minimum spread and minimum net margin;
 - Steam sell-fee basis points used by net-margin calculations;
 - maximum visible queue ahead;
@@ -264,7 +250,7 @@ See the complete interface with:
 uv run so-engine --help
 ```
 
-Run-scoped overrides do not modify the protected default selector policy unless a separate, explicitly approved maintenance change is made.
+The 9–13% discount band is not a run-scoped option: the main program always uses this fixed policy. Other controls only filter or operationally manage the selected recommendations; they do not move the pricing band.
 
 ## Proxies and rate limits
 

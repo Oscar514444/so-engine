@@ -1,3 +1,3 @@
-"""Stable Python package boundary for the SO Engine application."""
+"""Stable package boundary for the Steam Order Engine application."""
 
 __version__ = "3.3.0"

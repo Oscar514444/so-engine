@@ -63,7 +63,7 @@ def test_package_cli_reports_application_version_without_network():
     assert completed.stdout.strip() == "SO Engine 3.3.0"
 
 
-def test_cli_help_reports_nine_to_thirteen_percent_default_discount_band():
+def test_cli_help_reports_fixed_nine_to_thirteen_percent_policy():
     completed = subprocess.run(
         [sys.executable, "-m", "so_engine", "--help"],
         check=False,
@@ -72,8 +72,23 @@ def test_cli_help_reports_nine_to_thirteen_percent_default_discount_band():
     )
 
     assert completed.returncode == 0, completed.stderr
-    assert "(1300 = 13%)" in completed.stdout
-    assert "(900 = 9%)" in completed.stdout
+    assert "постоянный" in completed.stdout
+    assert "диапазон 9–13%" in completed.stdout
+    assert "--min-discount-bps" not in completed.stdout
+    assert "--max-discount-bps" not in completed.stdout
+
+
+def test_cli_rejects_custom_discount_band():
+    completed = subprocess.run(
+        [sys.executable, "-m", "so_engine", "--demo", "--min-discount-bps", "1200"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 2
+    assert "unrecognized arguments" in completed.stderr
+    assert "Traceback" not in completed.stderr
 
 
 def test_cli_reports_missing_items_file_without_traceback(tmp_path):

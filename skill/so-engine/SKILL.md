@@ -15,7 +15,7 @@ metadata:
 
 ## Purpose and routing
 
-Use this skill for SO Engine, FIFO/structural-wall CS2 buy orders, total-budget allocation, or `Item;count;price` output. For generic Steam data collection use the general Steam market skill instead.
+Use this skill for SO Engine (**Steam Order Engine**), the program for finding the best CS2 Steam Market buy-order price, FIFO/structural-wall buy orders, total-budget allocation, or `Item;count;price` output. For generic Steam data collection use the general Steam market skill instead.
 
 The packaged Python program is the sole executable **source of truth**:
 
@@ -25,6 +25,12 @@ The packaged Python program is the sole executable **source of truth**:
 - compatibility launchers: `SO Engine.py`, `bid_order_algorithm.py`.
 
 The skill routes, launches, verifies, and explains. It must not calculate a second price independently.
+
+## Fixed pricing policy
+
+The main program always uses a permanent **9–13% discount below the current top buy order**. It represents the band as `900`–`1300` basis points and does not expose CLI options for changing it. Other filters may skip a recommendation, but they never move the selector band.
+
+The selector computes the lower boundary as `ceil(top_bid * 0.87)` and the upper boundary as `floor(top_bid * 0.91)` in integer cents. It decomposes Steam's cumulative buy-order graph, identifies structural walls using absolute and relative order-count thresholds, selects one cent above the highest crossable wall, and falls back to the lower band boundary when no wall can be crossed safely.
 
 ## Immutable pricing guardrail
 
