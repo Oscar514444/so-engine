@@ -8,7 +8,7 @@ All notable changes to SO Engine are recorded here.
 
 - Expanded the public README with architecture, input/output contracts, budget allocation, operational controls, safety boundaries, and Steam Community Market examples.
 - Added a Steam Market graph section with an official historical-sales screenshot and annotated buy-order depth graphs showing the lower peaks detected by the selector.
-- Added a one-page contact sheet and a dedicated P250 lower-peak zoom image so the Steam graph annotations remain readable outside the full README layout.
+- Published the graph PNGs as GitHub Release assets so the README embeds binary images rather than unresolved repository-file links.
 
 ### Changed
 
