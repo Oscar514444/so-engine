@@ -35,13 +35,13 @@ The images below are item thumbnails served by Steam's Community Market listing 
 
 The first image is a screenshot of Steam's official **Median Sale Prices** chart for [`P250 | Cartel (Field-Tested)`](https://steamcommunity.com/market/listings/730/P250%20%7C%20Cartel%20%28Field-Tested%29). It is historical sales context only. **SO Engine does not select prices from this historical chart.**
 
-[![Steam Community Market median sale prices for P250 Cartel](https://raw.githubusercontent.com/Oscar514444/so-engine/main/docs/assets/steam-market/steam-market-history-p250-cartel-month.png)](https://steamcommunity.com/market/listings/730/P250%20%7C%20Cartel%20%28Field-Tested%29)
+[![Steam Community Market median sale prices for P250 Cartel](./docs/assets/steam-market/steam-market-history-p250-cartel-month.png)](https://steamcommunity.com/market/listings/730/P250%20%7C%20Cartel%20%28Field-Tested%29)
 
 The selector reads Steam's public `itemordershistogram` response and its cumulative `buy_order_graph`. The next two images are annotated visualizations of that live Steam order-book response after SO Engine decomposes cumulative counts into real per-price order levels. **Red bars are the lower order-book peaks (structural walls) detected by the program; green is the selected price.**
 
 ### P250 | Cartel — walls detected and crossed
 
-[![SO Engine catches lower buy-order peaks for P250 Cartel](https://raw.githubusercontent.com/Oscar514444/so-engine/main/docs/assets/steam-market/steam-buy-order-graph-p250-cartel-field-tested-annotated.png)](https://steamcommunity.com/market/listings/730/P250%20%7C%20Cartel%20%28Field-Tested%29)
+[![SO Engine catches lower buy-order peaks for P250 Cartel](./docs/assets/steam-market/steam-buy-order-graph-p250-cartel-field-tested-annotated.png)](https://steamcommunity.com/market/listings/730/P250%20%7C%20Cartel%20%28Field-Tested%29)
 
 Public snapshot shown in the image:
 
@@ -56,7 +56,7 @@ The algorithm starts at the highest usable lower peak, checks whether one cent a
 
 ### MP9 | Hydra — deterministic band-bottom fallback
 
-[![SO Engine band-bottom fallback for MP9 Hydra](https://raw.githubusercontent.com/Oscar514444/so-engine/main/docs/assets/steam-market/steam-buy-order-graph-mp9-hydra-battle-scarred-annotated.png)](https://steamcommunity.com/market/listings/730/MP9%20%7C%20Hydra%20%28Battle-Scarred%29)
+[![SO Engine band-bottom fallback for MP9 Hydra](./docs/assets/steam-market/steam-buy-order-graph-mp9-hydra-battle-scarred-annotated.png)](https://steamcommunity.com/market/listings/730/MP9%20%7C%20Hydra%20%28Battle-Scarred%29)
 
 This second snapshot shows the other branch of the selector: top buy order `$5.58`, fixed band `$4.86–$5.07`, and **no structural walls inside the band**. SO Engine therefore selects the lower boundary `$4.86` as `band_bottom` rather than inventing a peak.
 
