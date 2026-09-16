@@ -7,7 +7,8 @@ All notable changes to SO Engine are recorded here.
 ### Added
 
 - Expanded the public README with architecture, input/output contracts, budget allocation, operational controls, safety boundaries, and Steam Community Market examples.
-- Added illustrative Steam Market item thumbnails under `docs/assets/steam-market/` with links to their source listings.
+- Added a Steam Market graph section with an official historical-sales screenshot and annotated buy-order depth graphs showing the lower peaks detected by the selector.
+- Added live public Steam snapshot metadata for the annotated graph examples under `docs/assets/steam-market/`.
 
 ### Changed
 
