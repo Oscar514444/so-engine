@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="390" viewBox="0 0 1200 390" role="img" aria-labelledby="title desc">
+  <title id="title">Логика выбора цены SO Engine</title>
+  <desc id="desc">Схематичный стакан: фиксированный диапазон от 87 до 91 процентов верхней заявки; если стена подходит, цена выбирается на цент выше неё. Схема условная, не рыночные данные.</desc>
+  <defs>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#101a2c"/><stop offset="1" stop-color="#18263a"/></linearGradient>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 8 4 0 8Z" fill="#66a7ff"/></marker>
+  </defs>
+  <rect width="1200" height="390" rx="22" fill="url(#panel)"/>
+  <text x="42" y="48" fill="#f4f7fb" font-family="Segoe UI,Arial,sans-serif" font-size="22" font-weight="700">КАК ИЗ СТАКАНА ПОЛУЧАЕТСЯ ЦЕНОВОЙ ОРИЕНТИР</text>
+  <text x="42" y="74" fill="#aab9cd" font-family="Segoe UI,Arial,sans-serif" font-size="13">Учебная схема: уровни и количества условные, не котировка и не рекомендация.</text>
+  <g font-family="Segoe UI,Arial,sans-serif" font-size="13">
+    <text x="60" y="125" fill="#aab9cd">верхняя заявка T</text>
+    <line x1="206" y1="120" x2="970" y2="120" stroke="#8c9cb2" stroke-width="2" stroke-dasharray="7 6"/>
+    <text x="987" y="125" fill="#dce5f0">T · отправная точка</text>
+    <rect x="205" y="156" width="765" height="130" rx="10" fill="#1b3443" opacity=".85" stroke="#54e0c0" stroke-width="1.5"/>
+    <text x="222" y="181" fill="#54e0c0" font-weight="700">РАБОЧИЙ ДИАПАЗОН · 87%–91% ОТ T</text>
+    <line x1="205" y1="156" x2="205" y2="286" stroke="#54e0c0" stroke-width="2"/>
+    <line x1="970" y1="156" x2="970" y2="286" stroke="#54e0c0" stroke-width="2"/>
+    <text x="205" y="308" fill="#54e0c0">87% T · нижняя граница</text>
+    <text x="758" y="308" fill="#54e0c0">верхняя · 91% T</text>
+    <rect x="526" y="203" width="74" height="83" rx="7" fill="#ff786f" opacity=".82"/>
+    <text x="530" y="229" fill="#28191c" font-weight="700">СТЕНА</text><text x="534" y="248" fill="#28191c">уровень</text>
+    <line x1="610" y1="195" x2="658" y2="195" stroke="#66a7ff" stroke-width="2" marker-end="url(#arrow)"/>
+    <line x1="638" y1="199" x2="638" y2="286" stroke="#66a7ff" stroke-width="2" stroke-dasharray="4 4"/>
+    <circle cx="638" cy="203" r="8" fill="#66a7ff" stroke="#dcecff" stroke-width="2"/>
+    <text x="676" y="218" fill="#8fc0ff" font-weight="700">ориентир: 1¢ выше</text>
+    <text x="676" y="239" fill="#aab9cd">только если цена остаётся</text>
+    <text x="676" y="258" fill="#aab9cd">в диапазоне и не попадает</text>
+    <text x="676" y="277" fill="#aab9cd">на следующую стену</text>
+  </g>
+  <rect x="42" y="337" width="1116" height="1" fill="#344963"/>
+  <text x="42" y="365" fill="#aab9cd" font-family="Segoe UI,Arial,sans-serif" font-size="13">Если подходящей стены нет — выбирается нижняя граница. Очередь и исполнение не гарантируются.</text>
+</svg>
