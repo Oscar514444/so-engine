@@ -343,7 +343,9 @@ See [`docs/CHANGELOG.md`](docs/CHANGELOG.md) for release history and compatibili
 
 ## License
 
-The repository is public for inspection and collaboration, but the project does not currently grant a permissive open-source license. Unless a license file or an explicit author grant is added, all rights remain with the author.
+The project's original source code is dual-licensed under either the [MIT License](LICENSE-MIT) or the [Apache License 2.0](LICENSE-APACHE), at your option (`MIT OR Apache-2.0`).
+
+Third-party material, including Steam/Valve images, screenshots, trademarks, and any other third-party content, is not relicensed by this grant. Such material remains subject to its respective owner's terms. This project is not affiliated with or endorsed by Valve.
 
 ## Links
 
