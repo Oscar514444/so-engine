@@ -8,7 +8,7 @@ version = "3.3.0"
 description = "Steam Order Engine: fixed-band CS2 Steam Market buy-order price finder"
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "MIT OR Apache-2.0" }
+license = { text = "MIT" }
 dependencies = [
     "pysocks>=1.7,<2",
 ]

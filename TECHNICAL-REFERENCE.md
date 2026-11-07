@@ -345,7 +345,7 @@ See [`docs/CHANGELOG.md`](docs/CHANGELOG.md) for release history and compatibili
 
 ## License
 
-The project's original source code is dual-licensed under either the [MIT License](LICENSE-MIT) or the [Apache License 2.0](LICENSE-APACHE), at your option (`MIT OR Apache-2.0`).
+The project's original source code is licensed under the [MIT License](LICENSE).
 
 Third-party material, including Steam/Valve images, screenshots, trademarks, and any other third-party content, is not relicensed by this grant. Such material remains subject to its respective owner's terms. This project is not affiliated with or endorsed by Valve.
 
